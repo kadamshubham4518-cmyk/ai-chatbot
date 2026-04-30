@@ -1,10 +1,38 @@
 version: '3.8'
+
 services:
-  web:
+  chatbot:
     build: .
+    container_name: ai_chatbot
     ports:
       - "5000:5000"
     environment:
       FLASK_ENV: production
+      DEBUG: "False"
     volumes:
       - ./models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - chatbot_network
+
+  # Optional: PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: chatbot_postgres
+    environment:
+      POSTGRES_DB: chatbot_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chatbot_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  chatbot_network:
+    driver: bridge
